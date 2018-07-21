@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}
+    Browse - {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+    <h1>
+        Browse Recipes{% if initial %} Starting with
+        '{{ initial|title }}'{% endif %}
+    </h1>
+
+    {% for letter in 'abcdefghijklmnopqrstuvwxyz' %}
+    <a href="{% url 'browse_by_name' initial=letter %}"
+    {% if initial == letter %}class="active"{% endif %}>
+        {{ letter|upper }}
+    </a>
+    {% endfor %}
+
+    {% for recipe in recipes %}
+    <ul>
+        <li>
+            <a href="{% url 'recipe_detail' slug=recipe.slug %}">
+                {{ recipe.name }}
+            </a>
+        </li>
+    </ul>
+    {% empty %}
+    <p>Sorry, no results!</p>
+    {% endfor %}
+{% endblock content %}

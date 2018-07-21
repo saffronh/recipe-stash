@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}
+    {{ recipe.name }} - {{ block.super }}
+{% endblock title %}
+
+{% block content %}
+    <h2>{{ recipe.name }}</h2>
+    <p>{{ recipe.description }}</p>
+    {% if user == recipe.user %}
+        <p>
+            <a href="{% url 'edit_recipe' slug=recipe.slug %}">Edit me!</a>
+        </p>
+    {% endif %}
+{% endblock content %}
