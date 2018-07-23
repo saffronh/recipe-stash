@@ -1,1 +1,1 @@
-web: waitress-serve --port=$PORT recipestash.wsgi:application
+web: waitress-serve --port=$PORT myrecipestash.recipestash.wsgi:application
