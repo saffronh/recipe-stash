@@ -124,7 +124,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'staticfiles'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    '/home/recipestash/recipestash.pythonanywhere.com/static',
 )
 # For registration: to specify number of days the user has to
 # activate the account before ability to use it expires
