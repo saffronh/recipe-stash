@@ -5,7 +5,14 @@
 
 {% block content %}
     <h2>{{ recipe.name }}</h2>
-    <p>{{ recipe.description }}</p>
+    <h3>Ingredients</h3>
+    {% for ingredient in ingredients %}
+    <p>{{ ingredient.quantity }} {{ ingredient.measure }} {{ ingredient.ingredient_name }}</p>
+    {% endfor %}
+    <h3>Method</h3>
+    {% for method in methods %}
+    <p>Step {{ forloop.counter }}: {{ method.description }}</p>
+    {% endfor %}
     {% if user == recipe.user %}
         <p>
             <a href="{% url 'edit_recipe' slug=recipe.slug %}">Edit me!</a>

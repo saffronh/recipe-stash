@@ -30,6 +30,7 @@ from django.contrib.auth.views import (
 from collection import views
 from collection.backends import MyRegistrationView
 
+
 urlpatterns = [
     url(r'^$', views.index, name='home'),
     url(r'^about/$',
@@ -45,6 +46,7 @@ urlpatterns = [
         name='recipe_detail'),
     url(r'^recipes/(?P<slug>[-\w]+)/edit/$', views.edit_recipe,
         name='edit_recipe'),
+    url(r'^recipes/(?P<recipe_id>\d+)/delete/$', views.delete_recipe, name='delete_recipe'),
 
     # Accounts/Registration/Recipe Creation
     url(r'^accounts/',
@@ -95,4 +97,9 @@ urlpatterns = [
     url(r'^browse/name/(?P<initial>[-\w]+)/$',
     views.browse_by_name, name='browse_by_name'),
     url(r'^admin/', admin.site.urls),
+
+    # For dynamic forms
+    #url(r'^dynamic_forms/',
+     #   include(('dynamic_forms.urls'), namespace='dynamic_forms')),
+
 ]

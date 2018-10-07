@@ -4,6 +4,8 @@
 {% endblock title %}
 
 {% block content %}
+    <h1>All Recipes</h1>
+
     {% for recipe in recipes %}
         <a href="{% url 'recipe_detail' slug=recipe.slug %}">
             {{ recipe.name }}

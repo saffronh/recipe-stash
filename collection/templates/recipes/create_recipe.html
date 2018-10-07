@@ -1,13 +1,54 @@
 {% extends 'base.html' %}
+
 {% block title %}
     Create a Recipe - {{ block.super }}
 {% endblock title %}
 
 {% block content %}
-    <h1>Create a Recipe</h1>
-    <form role="form" action="" method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Submit" />
-    </form>
+
+<h1>Create a Recipe</h1>
+<form role="form" action="" method="post">
+    {% csrf_token %}
+    <p>
+    {{ recipeform.as_p }}
+</p>
+<!-- {{ ingredientform.management_form }}
+<div>
+    {% for form in ingredientform.forms %}
+        <table class='no_error'>
+            {{ form.as_table }}
+        </table>
+    {% endfor %}
+</div>
+
+{{ methodform.management_form }}
+<div id="form_set">
+    {% for form in methodform.forms %}
+        <table class='no_error'>
+            {{ form.as_table }}
+        </table>
+    {% endfor %}
+</div>
+ -->
+
+{{ ingredientform.management_form }}
+{% for form in ingredientform.forms %}
+<table class="table">
+    <tr>
+        <th>Quantity: {{form.quantity}}</th>
+        <th>{{form.measure}}</th>
+        <th>Ingredient: {{form.ingredient_name}}</th>
+    </tr>
+</table>
+{% endfor %}
+
+<br>
+
+{{ methodform.management_form }}
+{% for form in methodform.forms %}
+    <p>Step {{ forloop.counter }}:  {{ form.description }}</p>
+{% endfor %}
+
+<input type="submit" value="Submit" />
+</form>
 {% endblock %}

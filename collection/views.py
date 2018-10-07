@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from collection.models import Recipe
+from django.forms import ModelForm, modelformset_factory
+from collection.models import Recipe, Ingredient, Method, Tags
 from collection.forms import RecipeForm
 from django.template.defaultfilters import slugify
 from django.contrib.auth.decorators import login_required
@@ -14,7 +15,12 @@ def index(request):
 
 def recipe_detail(request, slug):
     recipe = Recipe.objects.get(slug=slug)
-    return render(request, 'recipes/recipe_detail.html', {'recipe': recipe,})
+    ingredients = Ingredient.objects.filter(recipe_id=recipe.id)
+    methods = Method.objects.filter(recipe_id=recipe.id).order_by('id')
+    return render(request, 'recipes/recipe_detail.html', {
+        'recipe': recipe,
+        'ingredients': ingredients,
+        'methods': methods,})
 
 @login_required
 def edit_recipe(request, slug):
@@ -24,39 +30,84 @@ def edit_recipe(request, slug):
     if recipe.user != request.user:
         raise Http404
 
-    # set form to be used
-    form_class = RecipeForm
+    # set forms to be used
+    recipe_form = RecipeForm
+    ingredient_formset = modelformset_factory(Ingredient, fields=('ingredient_name', 'quantity', 'measure',))
+    method_formset = modelformset_factory(Method, fields=('description',))
+
     # if we are coming to this from a submitted form
     if request.method == 'POST':
-        form = form_class(data=request.POST, instance=recipe)
-        if form.is_valid():
-            form.save()
+        recipeform = recipe_form(data=request.POST, instance=recipe)
+        ingredientform = ingredient_formset(request.POST, queryset=Ingredient.objects.filter(recipe_id=recipe.id))
+        methodform = method_formset(request.POST, queryset=Method.objects.filter(recipe_id=recipe.id))
+        if recipeform.is_valid() and ingredientform.is_valid() and methodform.is_valid():
+            recipeform.save()
+
+            # link ingredients to recipe
+            ingredients = ingredientform.save(commit=False)
+            for ingredient in ingredients:
+                ingredient.recipe = recipe
+
+            # link methods to recipe
+            methods = methodform.save(commit=False)
+            for method in methods:
+                method.recipe = recipe
+
+            ingredientform.save()
+            methodform.save()
+
             return redirect('recipe_detail', slug=recipe.slug)
     # else just create form
     else:
-        form = form_class(instance=recipe)
+        recipeform = recipe_form(instance=recipe)
+        ingredientform = ingredient_formset(queryset=Ingredient.objects.filter(recipe_id=recipe.id))
+        methodform = method_formset(queryset=Method.objects.filter(recipe_id=recipe.id))
     return render(request, 'recipes/edit_recipe.html', {
         'recipe': recipe,
-        'form': form,
+        'recipeform': recipeform,
+        'ingredientform': ingredientform,
+        'methodform': methodform,
     })
 
 def create_recipe(request):
-    form_class = RecipeForm
+    recipe_form = RecipeForm
+    ingredient_formset = modelformset_factory(Ingredient, extra=10, fields=('ingredient_name', 'measure', 'quantity',))
+    method_formset = modelformset_factory(Method, extra=10, fields=('description',))
 
     if request.method == 'POST':
-        form = form_class(request.POST)
-        if form.is_valid():
-            recipe = form.save(commit=False)
+        recipeform = recipe_form(request.POST)
+        ingredientform = ingredient_formset(request.POST, queryset=Ingredient.objects.none())
+        methodform = method_formset(request.POST, queryset=Method.objects.none())
+        if recipeform.is_valid() and ingredientform.is_valid() and methodform.is_valid():
+            recipe = recipeform.save(commit=False)
             recipe.user = request.user
             recipe.slug = slugify(recipe.name)
 
             recipe.save()
 
+            # link ingredients to recipe
+            ingredients = ingredientform.save(commit=False)
+            for ingredient in ingredients:
+                ingredient.recipe = recipe
+
+            # link methods to recipe
+            methods = methodform.save(commit=False)
+            for method in methods:
+                    method.recipe = recipe
+
+            ingredientform.save()
+            methodform.save()
+
             return redirect('recipe_detail', slug=recipe.slug)
     else:
-        form = form_class()
+        recipeform = recipe_form()
+        ingredientform = ingredient_formset(queryset=Ingredient.objects.none())
+        methodform = method_formset(queryset=Method.objects.none())
 
-    return render(request, 'recipes/create_recipe.html', {'form': form,})
+    return render(request, 'recipes/create_recipe.html', {
+        'recipeform': recipeform,
+        'ingredientform': ingredientform,
+        'methodform': methodform,})
 
 def browse_by_name(request, initial=None):
     if initial:
@@ -68,3 +119,9 @@ def browse_by_name(request, initial=None):
         'recipes': recipes,
         'initial': initial,
         })
+
+def delete_recipe(request, recipe_id):
+    Ingredient.objects.filter(recipe_id=recipe_id).delete()
+    Method.objects.filter(recipe_id=recipe_id).delete()
+    Recipe.objects.filter(id=recipe_id).delete()
+    return redirect('home')

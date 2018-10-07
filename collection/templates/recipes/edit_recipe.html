@@ -7,7 +7,37 @@
     <h1>Edit "{{ recipe.name }}"</h1>
     <form role="form" action="" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
+        {{ recipeform.as_p }}
+
+
+        {{ ingredientform.management_form }}
+{% for form in ingredientform.forms %}
+<table class="table">
+    <tr>
+        <th>Quantity: {{form.quantity}}</th>
+        <th>{{form.measure}}</th>
+        <th>Ingredient: {{form.ingredient_name}}</th>
+    </tr>
+</table>
+{% endfor %}
+<!--         <table>
+            {{ ingredientform }}
+        </table> -->
+<!--         <table>
+            {{ methodform }}
+        </table>
+ -->
+
+{{ methodform.management_form }}
+{% for form in methodform.forms %}
+    <p>Step {{ forloop.counter }}:  {{ form.description }}</p>
+{% endfor %}
+
+
+        <input type="submit" value="Submit" />
     </form>
+    <form action="{% url 'delete_recipe' recipe_id=recipe.id %}" method="POST">
+  {% csrf_token %}
+  <p><input class="btn btn-default btn-danger" type="submit" value="Delete"/></p>
+</form>
 {% endblock content %}
